@@ -38,13 +38,33 @@ sdl = SimpleDatasetLoader(preprocessors = [aap, isp])
 (data, labels) = sdl.load(imagePaths, verbose = 1)
 data = data.astype("float") / 255.0
 
+#split the dataset into the required stages
+(trainX, testX, trainY, testY) = train_test_split(data, labels, test_size = 0.25, random_state = 42)
 
+#Binarize the labels
+trainY = LabelBinarizer().fit_transform(trainY)
+testY = LabelBinarizer().fit_transform(testY)
 
+#introduce the baseModel, buiid the headmodel, introduce the class objects
+baseModel = VGG16(weights = "imagenet", include_top = False, input_tensor  = Input(shape = (224,224,3)))
+headModel = FCHeadNet.build(baseModel, len(classNames), 256)
+model = Model(inputs  = baseModel.input , outputs = headModel)
 
+#freezing the layers in the baseModel and warming them up
+for layer in baseModel.layers:
+    layer.trainable = False
 
+#warming up the mdoel for some action
+optimizer = RMSprop(lr = 0.001)
+modeol.compile(loss = "categorical_crossentropy",metrics = ['accuracy'], optimizer = optimizer)
+model.fit_generator(aug.flow(trainX, trainY, batch_size = 32),
+                    validation_data  = (testX, testY), epochs = 25, steps_per_epoch = 2*(len(trainX) // 32), verbose = 1)
 
+#predicting the classification result
+preds = model.predict(testX, batch_size  = 32)
+print(classification_report(testY.argmax(axis = 1), preds.argmax(axis = 1), target_names  = classNames))
 
-
+#Now to the real classification
 
 
 
