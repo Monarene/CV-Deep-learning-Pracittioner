@@ -28,6 +28,8 @@ random.seed(42)
 #the neccesary variables
 dataset_path = r"C:\Users\USER\Desktop\Data Science\My directory set-up for Computer-Vision\datasets\animals"
 output_path = r"C:\Users\USER\Desktop\Data Science\My directory set-up for Computer-Vision\Deep-Learning-for-Computer-Vision\Deep learning for computer vision - Practitioneers bundle\Exracted features\extract_animals_vgg16"
+model_path = r"C:\Users\H P ENVY\Desktop\Data Science\Soil Analysis Propject\models\first_model.pickle"
+
 bs = 10
 bufferSize = 20
 
@@ -83,7 +85,12 @@ print("[INFO] Evaluating predictions...")
 preds = model.predict(db["features"][i:])
 print(classification_report(db["targets"][i:], preds, target_names = ["Cat", "Dog", "Panda"])).
 
+#saving the model
+f = open(model_path, "wb")
+f.write(pickle.dumps(model.best_estimator_))
+f.close()
 
+422
 
 
 
